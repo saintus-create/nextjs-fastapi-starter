@@ -1,10 +1,15 @@
 {
   "rewrites": [
-    { "source": "/api/(.*)", "destination": "/api/index.py" }
+    { "source": "/api/(health|run-task|config)", "destination": "/api/index.py" },
+    { "source": "/api/(.*)", "destination": "/api/$1" }
   ],
   "functions": {
     "api/index.py": {
       "runtime": "python3.11",
+      "maxDuration": 30
+    },
+    "app/api/**/*.ts": {
+      "runtime": "nodejs18.x",
       "maxDuration": 30
     }
   }
