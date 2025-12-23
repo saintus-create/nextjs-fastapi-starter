@@ -74,6 +74,7 @@ class LLMRouter:
         "anthropic": {"base_url": None},  # Uses native Anthropic client
         "groq": {"base_url": "https://api.groq.com/openai/v1"},
         "sambanova": {"base_url": "https://api.sambanova.ai/v1"},
+        "codestral": {"base_url": "https://codestral.mistral.ai/v1"},  # Mistral's Codestral
     }
 
     def __init__(self, config: Dict[str, Any]):
