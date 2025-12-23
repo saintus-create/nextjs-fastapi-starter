@@ -1,0 +1,32 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "cline-agent"
+version = "0.8.0"
+description = "Agent with safety audit, reflection loop, and MCP/shadcn tool access"
+readme = "README.md"
+requires-python = ">=3.10"
+dependencies = [
+    "typer>=0.9",
+    "structlog>=23.1",
+    "openai>=1.0,<2.0",
+    "pydantic>=2.0",
+    "python-dotenv>=1.0",
+    "PyYAML>=6.0",
+    "requests>=2.28",
+    "httpx>=0.25",
+    "aiofiles>=23.0",
+    "fastapi>=0.100",
+    "uvicorn>=0.20",
+]
+
+[project.optional-dependencies]
+dev = ["pytest>=7.0", "ruff>=0.1", "black>=23.0"]
+
+[project.scripts]
+cline-agent = "cline_agent.cli:app"
+
+[tool.hatch.build.targets.wheel]
+packages = ["cline_agent"]

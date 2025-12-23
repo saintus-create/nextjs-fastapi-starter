@@ -1,7 +1,11 @@
 {
+  "rewrites": [
+    { "source": "/api/(.*)", "destination": "/api/index.py" }
+  ],
   "functions": {
-    "api/**": {
-      "excludeFiles": "{.next,.git,node_modules}/**"
+    "api/index.py": {
+      "runtime": "python3.11",
+      "maxDuration": 30
     }
   }
 }

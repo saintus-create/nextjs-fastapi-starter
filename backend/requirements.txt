@@ -1,12 +1,12 @@
-# Core FastAPI
-fastapi
-uvicorn
-pydantic
+# Core
+fastapi>=0.100
+uvicorn>=0.20
+pydantic>=2.0
 
-# AI/LLM
-openai
+# LLM
+openai>=1.0,<2.0
 
-# Cline Agent v0.8.0 dependencies
+# Agent
 typer>=0.9
 structlog>=23.1
 python-dotenv>=1.0

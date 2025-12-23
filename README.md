@@ -1,41 +1,138 @@
-# AI SDK Python Streaming Preview
+# Cline Agent v0.8.0
 
-This template demonstrates the usage of [Data Stream Protocol](https://sdk.vercel.ai/docs/ai-sdk-ui/stream-protocol#data-stream-protocol) to stream chat completions from a Python endpoint ([FastAPI](https://fastapi.tiangolo.com)) and display them using the [useChat](https://sdk.vercel.ai/docs/ai-sdk-ui/chatbot#chatbot) hook in your Next.js application.
+Terminal-first autonomous coding agent with safety guardrails, self-reflection, and MCP/shadcn integration.
 
-## Deploy your own
+## Features
 
-[![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https://github.com/vercel-labs/ai-sdk-preview-python-streaming)
+- **A - Safety Guardrail**: Static regex + LLM audit blocking dangerous commands
+- **B - Self-Reflection Loop**: Auto-retry on failure with critique
+- **C - MCP/shadcn Integration**: HTTP client for external tool servers
 
-## How to use
+## Project Structure
 
-Run [`create-next-app`](https://github.com/vercel/next.js/tree/canary/packages/create-next-app) with [npm](https://docs.npmjs.com/cli/init), [Yarn](https://yarnpkg.com/lang/en/docs/cli/create/), or [pnpm](https://pnpm.io) to bootstrap the example:
-
-```bash
-npx create-next-app --example https://github.com/vercel-labs/ai-sdk-preview-python-streaming ai-sdk-preview-python-streaming-example
+```
+├── api/                    # Vercel Python serverless
+│   └── index.py            # FastAPI entry point
+├── backend/                # Python package
+│   ├── cline_agent/        # Agent source code
+│   │   ├── agent/core.py   # Main Agent class
+│   │   ├── tools/          # File system, Git, MCP, Safety
+│   │   ├── llm/            # Multi-provider LLM router
+│   │   └── cli.py          # Typer CLI
+│   ├── pyproject.toml
+│   └── requirements.txt
+├── src/                    # Next.js frontend (optional)
+│   └── app/chat/           # Chat UI
+├── components/             # shadcn/ui components
+├── .github/workflows/      # CI/CD
+├── vercel.json             # Vercel config
+└── install.sh              # One-liner installer
 ```
 
-```bash
-yarn create next-app --example https://github.com/vercel-labs/ai-sdk-preview-python-streaming ai-sdk-preview-python-streaming-example
-```
+## Quick Start
+
+### Option 1: Local Development
 
 ```bash
-pnpm create next-app --example https://github.com/vercel-labs/ai-sdk-preview-python-streaming ai-sdk-preview-python-streaming-example
+# 1. Clone
+git clone https://github.com/saintus-create/nextjs-fastapi-starter.git
+cd nextjs-fastapi-starter
+
+# 2. Install Python deps
+python3 -m venv .venv
+source .venv/bin/activate
+pip install -r backend/requirements.txt
+
+# 3. Install Node deps
+pnpm install
+
+# 4. Set API key
+echo "OPENAI_API_KEY=sk-your-key" > .env.local
+
+# 5. Run (two terminals)
+# Terminal A - FastAPI
+python3 -m uvicorn api.index:app --reload --port 8000
+
+# Terminal B - Next.js
+pnpm dev
 ```
 
-To run the example locally you need to:
+### Chat Interface
 
-1. Sign up for accounts with the AI providers you want to use (e.g., OpenAI, Anthropic).
-2. Obtain API keys for each provider.
-3. Set the required environment variables as shown in the `.env.example` file, but in a new file called `.env`.
-4. `pnpm install` to install the required Node dependencies.
-5. `virtualenv venv` to create a virtual environment.
-6. `source venv/bin/activate` to activate the virtual environment.
-7. `pip install -r requirements.txt` to install the required Python dependencies.
-8. `pnpm dev` to launch the development server.
+The Next.js frontend now provides a seamless chat interface to interact with the autonomous coding agent:
 
-## Learn More
+- **Conversational AI Experience**: Chat naturally with the agent using plain English
+- **Safety Guardrails**: All requests are audited for dangerous operations
+- **Self-Reflection**: Agent automatically retries failed tasks with improved approaches
+- **Structured Execution**: Tasks are broken down into safe, atomic operations
 
-To learn more about the AI SDK or Next.js by Vercel, take a look at the following resources:
+**Example chat interactions:**
+- "Create a hello.py file that prints 'Hello, World!'"
+- "List all files in the current directory"
+- "Add a new function to utils.py"
+- "Check the git status and commit any changes"
 
-- [AI SDK Documentation](https://sdk.vercel.ai/docs)
-- [Next.js Documentation](https://nextjs.org/docs)
+### Option 2: CLI Only
+
+```bash
+cd backend
+pip install -e .
+cline-agent --help
+cline-agent task "Create a hello.py file" --mode autonomous
+```
+
+### Option 3: One-liner Install
+
+```bash
+curl -sSL https://get.cline-agent.com | bash
+```
+
+## API Endpoints
+
+| Endpoint | Method | Description |
+|----------|--------|-------------|
+| `/api/health` | GET | Health check |
+| `/api/run-task` | POST | Execute a task (direct agent API) |
+| `/api/chat` | POST | Chat interface for conversational agent interaction |
+| `/api/config` | GET | Get config (masked) |
+
+### Example
+
+```bash
+curl -X POST http://localhost:8000/api/run-task \
+  -H "Content-Type: application/json" \
+  -d '{"task": "list files", "mode": "plan_act"}'
+```
+
+## Environment Variables
+
+```bash
+# Required
+OPENAI_API_KEY=sk-...
+
+# Optional providers
+GROQ_API_KEY=gsk-...
+ANTHROPIC_API_KEY=sk-ant-...
+SAMBANOVA_API_KEY=...
+
+# Phase-specific models
+LLM_PLAN_MODEL=openai
+LLM_EXECUTE_MODEL=openai
+LLM_FALLBACK_MODEL=groq
+```
+
+## Deploy to Vercel
+
+1. Push to GitHub
+2. Import to Vercel
+3. Add environment variables in Vercel dashboard
+4. Deploy!
+
+Or via CLI:
+```bash
+vercel deploy
+```
+
+## License
+
+MIT

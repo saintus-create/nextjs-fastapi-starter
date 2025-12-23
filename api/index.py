@@ -1,39 +1,76 @@
-from typing import List
+# api/index.py
+"""FastAPI serverless function for Vercel."""
+import os
+from fastapi import FastAPI, HTTPException
+from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
-from dotenv import load_dotenv
-from fastapi import FastAPI, Query, Request as FastAPIRequest
-from fastapi.responses import StreamingResponse
-from openai import OpenAI
-from .utils.prompt import ClientMessage, convert_to_openai_messages
-from .utils.stream import patch_response_with_headers, stream_text
-from .utils.tools import AVAILABLE_TOOLS, TOOL_DEFINITIONS
-from vercel import oidc
-from vercel.headers import set_headers
+
+# Add backend to path for local dev
+import sys
+from pathlib import Path
+sys.path.insert(0, str(Path(__file__).parent.parent / "backend"))
+
+from cline_agent.agent.core import Agent
+
+app = FastAPI(title="Cline Agent API", version="0.8.0")
+
+# CORS for local development
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["http://localhost:3000", "http://localhost:3001"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 
-load_dotenv(".env.local")
-
-app = FastAPI()
-
-
-@app.middleware("http")
-async def _vercel_set_headers(request: FastAPIRequest, call_next):
-    set_headers(dict(request.headers))
-    return await call_next(request)
+class RunTaskRequest(BaseModel):
+    task: str
+    mode: str = "plan_act"
 
 
-class Request(BaseModel):
-    messages: List[ClientMessage]
+class HealthResponse(BaseModel):
+    status: str
+    version: str
 
 
-@app.post("/api/chat")
-async def handle_chat_data(request: Request, protocol: str = Query('data')):
-    messages = request.messages
-    openai_messages = convert_to_openai_messages(messages)
+@app.get("/api/health")
+async def health() -> HealthResponse:
+    """Health check endpoint."""
+    return HealthResponse(status="healthy", version="0.8.0")
 
-    client = OpenAI(api_key=oidc.get_vercel_oidc_token(), base_url="https://ai-gateway.vercel.sh/v1")
-    response = StreamingResponse(
-        stream_text(client, openai_messages, TOOL_DEFINITIONS, AVAILABLE_TOOLS, protocol),
-        media_type="text/event-stream",
-    )
-    return patch_response_with_headers(response, protocol)
+
+@app.post("/api/run-task")
+async def run_task(payload: RunTaskRequest):
+    """
+    Execute a task using the cline-agent.
+    Mirrors the CLI `cline-agent task` command.
+    """
+    try:
+        agent = Agent()
+        result = agent.run_task(payload.task, mode=payload.mode)
+        return result.model_dump() if hasattr(result, "model_dump") else result
+    except Exception as exc:
+        raise HTTPException(status_code=500, detail=str(exc))
+
+
+@app.get("/api/config")
+async def get_config():
+    """Get current agent configuration (secrets masked)."""
+    try:
+        from cline_agent.config import load_config
+        cfg = load_config()
+        
+        def _mask(obj):
+            if isinstance(obj, dict):
+                return {
+                    k: "***" if "api_key" in k.lower() and v else _mask(v)
+                    for k, v in obj.items()
+                }
+            if isinstance(obj, list):
+                return [_mask(i) for i in obj]
+            return obj
+        
+        return {"success": True, "config": _mask(cfg)}
+    except Exception as exc:
+        raise HTTPException(status_code=500, detail=str(exc))

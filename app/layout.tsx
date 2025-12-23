@@ -3,6 +3,7 @@ import { GeistSans } from "geist/font/sans";
 import { Toaster } from "sonner";
 import { cn } from "@/lib/utils";
 import { Navbar } from "@/components/navbar";
+import { ThemeProvider } from "next-themes";
 
 export const metadata = {
   title: "AI SDK Python Streaming Preview",
@@ -32,11 +33,12 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en">
-      <head></head>
-      <body className={cn(GeistSans.className, "antialiased dark")}>
-        <Toaster position="top-center" richColors />
-        <Navbar />
-        {children}
+      <body className={cn(GeistSans.className, "antialiased")}>
+        <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
+          <Toaster position="top-center" richColors />
+          <Navbar />
+          {children}
+        </ThemeProvider>
       </body>
     </html>
   );

@@ -2,11 +2,7 @@
 
 import type { CreateUIMessage, UIMessage, UseChatHelpers, UseChatOptions } from "@ai-sdk/react";
 
-type ChatRequestOptions = {
-  headers?: Record<string, string> | Headers;
-  body?: object;
-  data?: any;
-};
+type ChatRequestOptions = {};
 import { motion } from "framer-motion";
 import type React from "react";
 import {
@@ -120,9 +116,9 @@ export function MultimodalInput({
   }, [handleSubmit, setLocalStorageInput, width]);
 
   return (
-    <div className="relative w-full flex flex-col gap-4">
+    <div className="relative flex flex-col gap-4 w-full">
       {messages.length === 0 && (
-        <div className="grid sm:grid-cols-2 gap-2 w-full">
+        <div className="gap-2 grid sm:grid-cols-2 w-full">
           {suggestedActions.map((suggestedAction, index) => (
             <motion.div
               initial={{ opacity: 0, y: 20 }}
@@ -145,7 +141,7 @@ export function MultimodalInput({
                     ],
                   });
                 }}
-                className="text-left border rounded-xl px-4 py-3.5 text-sm flex-1 gap-1 sm:flex-col w-full h-auto justify-start items-start"
+                className="sm:flex-col flex-1 justify-start items-start gap-1 px-4 py-3.5 border rounded-xl w-full h-auto text-sm text-left"
               >
                 <span className="font-medium">{suggestedAction.title}</span>
                 <span className="text-muted-foreground">
@@ -163,7 +159,7 @@ export function MultimodalInput({
         value={input || ""}
         onChange={handleInput}
         className={cn(
-          "min-h-[24px] max-h-[calc(75dvh)] overflow-hidden resize-none rounded-xl !text-base bg-muted",
+          "bg-muted rounded-xl min-h-[24px] max-h-[calc(75dvh)] overflow-hidden !text-base resize-none",
           className
         )}
         rows={3}
@@ -183,7 +179,7 @@ export function MultimodalInput({
 
       {isLoading ? (
         <Button
-          className="rounded-full p-1.5 h-fit absolute bottom-2 right-2 m-0.5 border dark:border-zinc-600"
+          className="right-2 bottom-2 absolute m-0.5 p-1.5 border dark:border-zinc-600 rounded-full h-fit"
           onClick={(event) => {
             event.preventDefault();
             stop();
@@ -194,7 +190,7 @@ export function MultimodalInput({
         </Button>
       ) : (
         <Button
-          className="rounded-full p-1.5 h-fit absolute bottom-2 right-2 m-0.5 border dark:border-zinc-600"
+          className="right-2 bottom-2 absolute m-0.5 p-1.5 border dark:border-zinc-600 rounded-full h-fit"
           onClick={(event) => {
             event.preventDefault();
             submitForm();

@@ -1,4 +1,5 @@
 import type { FileUIPart } from "ai";
+import Image from "next/image";
 
 import { LoaderIcon } from "./icons";
 
@@ -14,16 +15,15 @@ export const PreviewAttachment = ({
 
   return (
     <div className="flex flex-col gap-2">
-      <div className="w-20 aspect-video bg-muted rounded-md relative flex flex-col items-center justify-center">
+      <div className="relative flex flex-col justify-center items-center bg-muted rounded-md w-20 aspect-video">
         {mediaType ? (
           mediaType.startsWith("image") ? (
-            // NOTE: it is recommended to use next/image for images
-            // eslint-disable-next-line @next/next/no-img-element
-            <img
+            <Image
               key={url}
               src={url}
               alt={displayName}
-              className="rounded-md size-full object-cover"
+              fill
+              className="rounded-md object-cover"
             />
           ) : (
             <div className="" />
@@ -33,12 +33,12 @@ export const PreviewAttachment = ({
         )}
 
         {isUploading && (
-          <div className="animate-spin absolute text-zinc-500">
+          <div className="absolute text-zinc-500 animate-spin">
             <LoaderIcon />
           </div>
         )}
       </div>
-      <div className="text-xs text-zinc-500 max-w-16 truncate">
+      <div className="max-w-16 text-zinc-500 text-xs truncate">
         {displayName}
       </div>
     </div>
